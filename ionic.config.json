@@ -1,0 +1,7 @@
+{
+  "name": "mobile-app-drivers",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

@@ -10,20 +10,24 @@ export interface ILoginInput {
 
 export interface IAuthenticationService {
     loading: boolean;
+    redirecting: boolean;
     user: Thunk<IAuthenticationService, {}, {}, Promise<User | null>>,
     isLoggedIn : boolean,
     checkAuthState: Thunk<IAuthenticationService, void, ISocketService,{},Promise<boolean>>,
     userManager: UserManager,
-    login: Thunk<IAuthenticationService, ILoginInput, ISocketService,{},Promise<void>>;
+    login: Thunk<IAuthenticationService, ILoginInput, {},{},Promise<void>>;
     handleLoginCallback: Thunk<IAuthenticationService, void, ISocketService,{},Promise<void>>;
     logout: Thunk<IAuthenticationService, void, {},Promise<void>>;
-    handleLogoutCallback: Thunk<IAuthenticationService, void, {},{},Promise<void>>;
+    handleLogoutCallback: Thunk<IAuthenticationService, void, ISocketService,{},Promise<void>>;
 	initiateLoading: Action<IAuthenticationService>;
 	finalizeLoading: Action<IAuthenticationService>;
+	initiateRedirecting: Action<IAuthenticationService>;
+	finalizeRedirecting: Action<IAuthenticationService>;
 }
 
 export const authenticationService: IAuthenticationService = {
     loading: false,
+    redirecting: false,
     isLoggedIn:false,
     userManager: new UserManager({
       authority: "https://localhost:5001",
@@ -54,13 +58,12 @@ export const authenticationService: IAuthenticationService = {
                 const IsLoggedIn = user ? !user.expired : false;
                 if (currentState !== IsLoggedIn) {
                     if (IsLoggedIn) {
-                        console.log(state.injections)
                         state.injections.connect("ws://localhost:3333", user!.access_token)
+                    } else {
+                        state.injections.disconnect();
                     }
                 }
-                        console.log("ASD" + IsLoggedIn)
                 state.getState().isLoggedIn = IsLoggedIn;
-                console.log(state)
                 resolve(IsLoggedIn);
             })
             .catch(() => {
@@ -76,7 +79,7 @@ export const authenticationService: IAuthenticationService = {
             axios.post("https://localhost:5001/api/login", { email, password }, {
                 withCredentials:true
             })
-                .then(r => console.log(r))
+                .then(r => actions.initiateRedirecting())
                 .then(() => manager.signinRedirect()
                     .then(() => resolve())
                     .catch(() => reject())
@@ -88,40 +91,48 @@ export const authenticationService: IAuthenticationService = {
     }),
     handleLoginCallback : thunk((actions,_,state) : Promise<void> => {
         return new Promise<void>((resolve, reject) => {
+            actions.initiateRedirecting();
             state.getState().userManager
                 .signinRedirectCallback()
                 .then(() => {
                     const manager = state.getState().userManager;
                     manager.getUser()
                     .then((user) =>{
-                        console.log(user)
                         axios.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
-                        // manager.events.addUserSignedOut(() => state.injections.disconnect())
-                        // manager.events.addAccessTokenExpired(() => state.injections.disconnect())
+                        state.injections.connect("ws://localhost:3333", user!.access_token)
+                        state.getState().isLoggedIn = true;
                         resolve()
                     })
-                    .catch(() => reject());
+                    .catch(() => reject())
+                    .finally(() => actions.finalizeRedirecting());
                 })
-                .catch(() => reject());
+                .catch(() => reject())
+                .finally(() => actions.finalizeRedirecting());
         })
     }),
     logout: thunk((actions, _,state) : Promise<void> => {
         return new Promise<void>((resolve, reject) => {
+            actions.initiateLoading();
              state.getState().userManager
                 .signoutRedirect()
                 .then(() => resolve())
-                .catch(() => reject());
+                .catch(() => reject())
+                .finally(() => actions.finalizeLoading())
             })
     }),
     handleLogoutCallback : thunk((actions,_,state) : Promise<void> => {
         return new Promise<void>((resolve, reject) => {
+            actions.initiateRedirecting();
             state.getState().userManager
                 .signoutRedirectCallback()
                 .then(() => {
                     axios.defaults.headers = null;
+                    state.getState().isLoggedIn = false;
+                    state.injections.disconnect();
                     resolve();
                 })
-                .catch(() => reject());
+                .catch(() => reject())
+                .finally(() => actions.finalizeRedirecting());
         })
     }),
 	initiateLoading: action((state) => {
@@ -129,5 +140,11 @@ export const authenticationService: IAuthenticationService = {
 	}),
 	finalizeLoading: action((state) => {
 		state.loading = false;
+	}),
+	initiateRedirecting: action((state) => {
+		state.redirecting = true;
+	}),
+	finalizeRedirecting: action((state) => {
+		state.redirecting = false;
 	}),
 };

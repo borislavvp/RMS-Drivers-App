@@ -20,24 +20,23 @@ import { SignInRedirect } from './pages/login/SignInRedirect';
 import { useStoreActions, useStoreState } from './store';
 
 const App: React.FC = () => {
-	const { loading, isLoggedIn } = useStoreState(state => state.authenticationService)
+	const isLoggedIn = useStoreState(state => state.authenticationService.isLoggedIn)
 	const checkAuth = useStoreActions(actions => actions.authenticationService.checkAuthState);
 	 useEffect(() => {
         (async () => {
             try {
-                await checkAuth();
+				await checkAuth();
             } catch (error) {
                 console.log(error)
             }
         })()
     }, []);
-	const renderMainPage = () => loading ? <IonLoading isOpen={true}/> : isLoggedIn ? <Main /> : <Login />
 	return (
 		<IonApp class="bg-gray-100 ">
 			<IonReactRouter>
 				<IonRouterOutlet animated={false} class="justify-center flex">
 					<Router history={history}>
-						<Route path="/" component={renderMainPage} exact={true} />
+						<Route path="/" component={isLoggedIn ? Main : Login} exact={true} />
 						<Route path="/signin-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/signout-callback-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/login" component={Login} exact={true} />

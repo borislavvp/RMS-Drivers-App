@@ -11,21 +11,21 @@ export const Main: React.FC = () => {
     useEffect(() => {
         socket.on.OrderReadyForPickup = pushOrderToStack;
         socket.on.OrderStatusChange = removeOrderFromStack;
-    }, []);
+    }, [pushOrderToStack,removeOrderFromStack]);
 
 	return (
         <IonPage>
             <IonContent>
                 <IonText>
-                    Chorba Driver
+                    Chorba Driver 
                 </IonText>
-                {orderAvailable.orderNumber !== undefined && <IonAlert
-                    isOpen={true}
+                <IonAlert
+                    isOpen={orderAvailable.orderNumber !== undefined}
                     header="Order available!"
                     cssClass="rounded-lg shadow-lg"
                     message={`${orderAvailable.orderNumber}`}
                     buttons={['OK']}
-                />}
+                />
             </IonContent>
         </IonPage>
 	);

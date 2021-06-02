@@ -34,7 +34,7 @@ export const authenticationService: IAuthenticationService = {
       client_id: "MOBILE_APP_ID",
       redirect_uri:  window.location.protocol + "//" + window.location.host + "/signin-oidc",
       response_type: "code",
-      scope: "openid profile proeprestaurantgateway.fullaccess",
+      scope: "openid profile proepdriversgateway.fullaccess",
       post_logout_redirect_uri: window.location.protocol + "//" + window.location.host + "/signout-callback-oidc",
       automaticSilentRenew: true,
       silent_redirect_uri: window.location.protocol + "//" + window.location.host + "/assets/silent-callback.html"

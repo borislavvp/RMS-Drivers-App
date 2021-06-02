@@ -19,7 +19,7 @@ export const ordersService: IOrdersService = {
     orderAvailable: {} as OrderReadyForPickupPayload,
     pushOrderToStack: action((state, { payload }) => {
         state.orders.push(payload);
-        if (state.orders.length == 1) {
+        if (state.orders.length === 1) {
             state.orderAvailable = payload;
         }
     }),

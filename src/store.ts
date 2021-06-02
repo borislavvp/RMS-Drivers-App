@@ -1,5 +1,5 @@
 import { createStore, createTypedHooks } from "easy-peasy";
-import model, { StoreModel } from "./models";
+import services, { StoreModel } from "./service";
 
 import {SocketService} from './service/socket/SocketService';
 
@@ -11,7 +11,7 @@ const { useStoreActions, useStoreState, useStoreDispatch,useStore } = createType
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };
   
-const store = createStore(model, {
+const store = createStore(services, {
   injections: socket
 });
 

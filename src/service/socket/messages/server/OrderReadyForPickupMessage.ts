@@ -1,7 +1,7 @@
 import { Message } from "../Message";
 import { ServerMessageType } from "./ServerMessageType";
 
-interface OrderReadyForPickupPayload {
+export interface OrderReadyForPickupPayload {
   orderNumber: number;
   orderDate: string,
   customerName: string,

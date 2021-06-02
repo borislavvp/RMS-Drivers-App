@@ -1,7 +1,14 @@
+import { ActionCreator } from "easy-peasy"
+import { OrderReadyForPickupMessage } from "../messages/server/OrderReadyForPickupMessage"
+import { OrderStatusChangeMessage } from "../messages/server/OrderStatusChangeMessage"
 import { SocketMessagesListeners } from "../types/SocketMessageListneners"
 
-export const initializeSocketListeners = (): SocketMessagesListeners => {
+export const initializeSocketListeners = (
+    orderReadyForPickupListener?: ActionCreator<OrderReadyForPickupMessage>,
+    orderStatusChangedListener?: ActionCreator<OrderStatusChangeMessage>): SocketMessagesListeners => {
+    
     return {
-        OrderReadyForPickup: () => null,
+        OrderReadyForPickup: orderReadyForPickupListener!,
+        OrderStatusChange: orderStatusChangedListener!,
     }
 }

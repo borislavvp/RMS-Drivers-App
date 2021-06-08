@@ -36,7 +36,8 @@ const App: React.FC = () => {
 			<IonReactRouter>
 				<IonRouterOutlet animated={false} class="justify-center flex">
 					<Router history={history}>
-						<Route path="/" component={isLoggedIn ? Main : Login} exact={true} />
+						{/* <Route path="/" component={isLoggedIn ? Main : Login} exact={true} /> */}
+						<Route path="/" component={Main} exact={true} />
 						<Route path="/signin-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/signout-callback-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/login" component={Login} exact={true} />

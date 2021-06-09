@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {  IonText, IonPage, IonContent, IonAlert, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonItem, IonLabel} from '@ionic/react';
+import {  IonText, IonPage, IonContent, IonAlert, IonIcon, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonItem, IonLabel} from '@ionic/react';
 import { socket, useStoreActions, useStoreState } from '../store';
 
 export const Main: React.FC = () => {
@@ -20,32 +20,37 @@ export const Main: React.FC = () => {
 
 	return (
         <IonPage>
-            <IonContent>
-                <IonCard>
-                    <IonCardHeader>
-                        <IonCardTitle>Order Number 1</IonCardTitle>
-                    </IonCardHeader>
+            <IonContent class="ion-text-center">
+                    <IonCard>
+                        <IonCardHeader>
+                            <IonCardTitle>Order Number 1</IonCardTitle>
+                        </IonCardHeader>
 
-                    <IonCardContent>
-                    <IonItem>
-                        <IonLabel>Addres: {address}</IonLabel>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>Customer Name: {name}</IonLabel>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>Phone: {phone}</IonLabel>
-                    </IonItem>
-                       Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio, maxime!
-                    </IonCardContent>
-                </IonCard>
-                {pickedup == false && <IonButton>
-                    Notify Pick-Up
-                </IonButton>}
-                {pickedup == true && <IonButton>
-                    Delivered
-                </IonButton>}
-                
+                        <IonCardContent>
+                        <IonItem>
+                            <IonLabel>Addres: {address}</IonLabel>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel>Customer Name: {name}</IonLabel>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel>Phone: {phone}</IonLabel>
+                        </IonItem>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio, maxime!
+                        </IonCardContent>
+                    </IonCard>
+                    <div className="ion-text-center">  
+                        {pickedup == false && <IonButton>
+                            <IonIcon name="arrow-up-outline" color="light"></IonIcon>
+                            <IonIcon name="bag-check-outline"></IonIcon>
+                            Notify Pick-Up
+                        </IonButton>}
+                    </div>
+                    
+                    {/* {pickedup == true && <IonButton onClick={() => changeOrderState()}>
+                        <IonIcon name="bag-check-outline"></IonIcon>
+                        Delivered
+                    </IonButton>} */}
                 {orderAvailable.orderNumber !== undefined && <IonAlert
                     isOpen={true}
                     header="Order available!"

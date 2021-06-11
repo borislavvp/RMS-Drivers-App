@@ -1,14 +1,18 @@
-import { action, thunk, Action, Thunk, ActionMapper } from 'easy-peasy';
+import { action, Action, thunk, Thunk } from 'easy-peasy';
 import axios from 'axios';
-import { ISocketService } from './socket/SocketService';
 
-import { OrderReadyForPickupMessage, OrderReadyForPickupPayload } from './socket/messages/server/OrderReadyForPickupMessage';
+import { OrderReadyForPickupMessage } from './socket/messages/server/OrderReadyForPickupMessage';
 import { OrderStatus, OrderStatusChangeMessage } from './socket/messages/server/OrderStatusChangeMessage';
+import { authenticationService } from './AuthenticationService';
+import { Order } from '../pages/Main';
+
 export interface IOrdersService {
-    orders: OrderReadyForPickupPayload[],
-    orderAvailable: OrderReadyForPickupPayload,
+    orders: Order[],
+    orderAvailable: Order,
+    fetchDailyOrders: Thunk<IOrdersService, {}, Promise<void>>;
+    saveOrders: Action<IOrdersService, Order[]>;
     pushOrderToStack: Action<IOrdersService,OrderReadyForPickupMessage>;
-    removeOrderFromStack: Action<IOrdersService,OrderStatusChangeMessage>;
+    removeOrderFromStack: Action<IOrdersService, OrderStatusChangeMessage>;
     loading: boolean;
 	initiateLoading: Action<IOrdersService>;
 	finalizeLoading: Action<IOrdersService>;
@@ -16,7 +20,19 @@ export interface IOrdersService {
 
 export const ordersService: IOrdersService = {
     orders: [],
-    orderAvailable: {} as OrderReadyForPickupPayload,
+    orderAvailable: {} as Order,
+    fetchDailyOrders: thunk((actions, state): Promise<void> => {
+        return new Promise<void>(() => {
+            authenticationService.userManager.getUser().then(user => {
+            axios.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
+            axios.get<Order[]>('https://localhost:5052/orders')
+                .then(data => {
+                    var list = data.data.filter(order => order.status == OrderStatus.Prepared) as Order[];
+                    actions.saveOrders(list);
+                })
+            }) 
+        })
+    }),
     pushOrderToStack: action((state, { payload }) => {
         state.orders.push(payload);
         if (state.orders.length === 1) {
@@ -25,10 +41,10 @@ export const ordersService: IOrdersService = {
     }),
     removeOrderFromStack: action((state, {payload}) => {
         if (payload.orderStatus === OrderStatus.Delivering) {
-            const orderIndex = state.orders.findIndex(o => o.orderNumber === payload.orderNumber)
+            const orderIndex = state.orders.findIndex(o => o.id === payload.orderNumber)
             if (orderIndex !== -1) {
                 state.orders.splice(orderIndex,1);
-                state.orderAvailable = state.orders.length > 0 ? state.orders[0] : {} as OrderReadyForPickupPayload;
+                state.orderAvailable = state.orders.length > 0 ? state.orders[0] : {} as Order;
             }
         }
     }),
@@ -38,5 +54,8 @@ export const ordersService: IOrdersService = {
 	}),
 	finalizeLoading: action((state) => {
 		state.loading = false;
-	})
+	}),
+    saveOrders: action((state, orders) => {
+        state.orders = orders;
+    })
 };

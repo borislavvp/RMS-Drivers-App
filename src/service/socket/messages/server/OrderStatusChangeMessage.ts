@@ -11,7 +11,7 @@ export enum OrderStatus{
 
 interface OrderStatusChangePayload {
   orderNumber: number;
-  orderStatus: OrderStatus
+  orderStatus: OrderStatus;
 }
 
 export class OrderStatusChangeMessage implements Message {

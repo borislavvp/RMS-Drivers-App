@@ -28,11 +28,6 @@ export const Main: React.FC = () => {
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
-    var pickedup = Boolean(false);
-    var address = String("Eindhoven");
-    var name = String("Thaqi");
-    var phone = String("0123456789");
-
     useEffect(() => {
         socket.on.OrderReadyForPickup = pushOrderToStack;
         socket.on.OrderStatusChange = removeOrderFromStack;
@@ -79,20 +74,32 @@ export const Main: React.FC = () => {
             }
             {selectedOrder && 
                 <>
-                    <IonText>{selectedOrder.id.toString()}</IonText>
-                    <IonText>{selectedOrder.firstName.toString()}</IonText>
-                    <IonText>{selectedOrder.lastName.toString()}</IonText>
-                    <IonText>{selectedOrder.address.toString()}</IonText>
-                    <IonText>{selectedOrder.phone.toString()}</IonText>
-                    <IonText>{selectedOrder.status.toString()}</IonText>
-                    <button onClick={() => deliver()}>Dostavi</button>
+                    <IonCard>
+                        <IonCardHeader>
+                            <IonCardTitle>Order Number {selectedOrder.id.toString()}</IonCardTitle>
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <IonItem>
+                                <IonLabel>Addres: {selectedOrder.address.toString()}</IonLabel>
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel>Customer Name: {selectedOrder.firstName.toString()} {selectedOrder.lastName.toString()}</IonLabel>
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel>Phone: {selectedOrder.phone.toString()}</IonLabel>
+                            </IonItem>
+                            <div className="ion-text-center">  
+                                <IonButton onClick={() => deliver()}>Deliver</IonButton>
+                            </div>
+                        </IonCardContent>
+                    </IonCard>
                 </>
             }
             {(orders[0] === undefined && !selectedOrder) && 
                 <IonText>Waiting for new orders to come...</IonText>
             }
             <IonAlert
-                isOpen={orderAvailable.id !== undefined}
+                isOpen={orderAvailable.id !== undefined && !selectedOrder}
                 header="Order available!"
                 cssClass="rounded-lg shadow-lg"
                 message={`${orderAvailable.id}`}

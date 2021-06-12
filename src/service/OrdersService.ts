@@ -11,7 +11,7 @@ export interface IOrdersService {
     orderAvailable: Order,
     fetchDailyOrders: Thunk<IOrdersService, {}, Promise<void>>;
     saveOrders: Action<IOrdersService, Order[]>;
-    pushOrderToStack: Action<IOrdersService,OrderReadyForPickupMessage>;
+    pushOrderToStack: Action<IOrdersService, OrderReadyForPickupMessage>;
     removeOrderFromStack: Action<IOrdersService, OrderStatusChangeMessage>;
     loading: boolean;
 	initiateLoading: Action<IOrdersService>;
@@ -34,10 +34,19 @@ export const ordersService: IOrdersService = {
         })
     }),
     pushOrderToStack: action((state, { payload }) => {
-        state.orders.push(payload);
-        if (state.orders.length === 1) {
-            state.orderAvailable = payload;
+        console.log("PAYLOAD", payload)
+        var order = {
+            id: payload.orderNumber,
+            firstName: payload.customerName.substr(0, payload.customerName.indexOf(' ')),
+            lastName: payload.customerName.substr(payload.customerName.indexOf(' ') + 1),
+            address: payload.location,
+            phone: payload.customerPhone,
+            status: OrderStatus.Prepared
         }
+        console.log("ORDER", order)
+        // state.orderAvailable = payload;
+        state.orders.push(order as Order);
+        console.log("ORDERS", state.orders)
     }),
     removeOrderFromStack: action((state, {payload}) => {
         if (payload.orderStatus === OrderStatus.Delivering) {

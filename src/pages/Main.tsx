@@ -26,12 +26,14 @@ export const Main: React.FC = () => {
         fetchOrders({})
     }, [])
 
+    useEffect(() => {console.log("TOVA SA ORDERS", orders)}, [orders])
+
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
     useEffect(() => {
         socket.on.OrderReadyForPickup = pushOrderToStack;
         socket.on.OrderStatusChange = removeOrderFromStack;
-    }, [pushOrderToStack,removeOrderFromStack]);
+    }, [pushOrderToStack, removeOrderFromStack]);
     
     const pickUp = () => {
         setSelectedOrder(orders[0]);
@@ -41,9 +43,8 @@ export const Main: React.FC = () => {
         })
     } 
     
-    const deliver = () => {
-        axios.patch("https://localhost:5052/orders", {id: selectedOrder?.id, status: 5});
-        setSelectedOrder(null)
+    const deliver = async () => {
+        axios.patch("https://localhost:5052/orders", {id: selectedOrder!.id, status: 5}).then(() => setSelectedOrder(null));
     }
 
 	return (
@@ -96,10 +97,12 @@ export const Main: React.FC = () => {
                 </>
             }
             {(orders[0] === undefined && !selectedOrder) && 
-                <IonText>Waiting for new orders to come...</IonText>
+                <div className="col" style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <IonText>Waiting for new orders to come...</IonText>
+                </div>
             }
             <IonAlert
-                isOpen={orderAvailable.id !== undefined && !selectedOrder}
+                isOpen={orderAvailable.id !== undefined}
                 header="Order available!"
                 cssClass="rounded-lg shadow-lg"
                 message={`${orderAvailable.id}`}

@@ -29,22 +29,28 @@ import { useStoreActions, useStoreState } from './store';
 
 const App: React.FC = () => {
 	const isLoggedIn = useStoreState(state => state.authenticationService.isLoggedIn)
+	const loading = useStoreState(state => state.authenticationService.loading)
+	const redirecting = useStoreState(state => state.authenticationService.redirecting)
 	const checkAuth = useStoreActions(actions => actions.authenticationService.checkAuthState);
 	 useEffect(() => {
         (async () => {
-            try {
-				await checkAuth();
+			try {
+				if (!loading && !redirecting) {
+					await checkAuth();
+				}
             } catch (error) {
                 console.log(error)
             }
         })()
-    }, []);
+	 }, []);
+	
+	const getMainComponent = () => isLoggedIn ? Main : Login;
 	return (
 		<IonApp class="bg-gray-100 ">
 			<IonReactRouter>
 				<IonRouterOutlet animated={false} class="justify-center flex">
 					<Router history={history}>
-						<Route path="/" component={isLoggedIn ? Main : Login} exact={true} />
+						<Route path="/" component={getMainComponent()} exact={true} />
 						<Route path="/signin-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/signout-callback-oidc" component={SignInRedirect} exact={true} />
 						<Route path="/login" component={Login} exact={true} />

@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import {  IonText, IonPage, IonContent, IonAlert, IonIcon, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonItem, IonLabel} from '@ionic/react';
+import React, { ReactElement, useEffect, useState } from 'react';
+import {  IonText, IonPage, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel} from '@ionic/react';
 import { socket, useStoreActions, useStoreState } from '../store';
 import { OrderStatus } from '../service/socket/messages/server/OrderStatusChangeMessage';
-import axios from 'axios';
-import { authenticationService } from '../service/AuthenticationService';
 
 export interface Order {
     id: number;
@@ -18,96 +16,78 @@ export const Main: React.FC = () => {
     const removeOrderFromStack = useStoreActions(actions => actions.ordersService.removeOrderFromStack);
     const pushOrderToStack = useStoreActions(actions => actions.ordersService.pushOrderToStack);
     const fetchOrders = useStoreActions(actions => actions.ordersService.fetchDailyOrders);
+    const notifyDelivered = useStoreActions(actions => actions.ordersService.notifyDelivered);
+    const notifyPickup = useStoreActions(actions => actions.ordersService.notifyPickup);
 
     const orderAvailable = useStoreState(state => state.ordersService.orderAvailable);
-    const orders = useStoreState(state => state.ordersService.orders);
 
-    useEffect(() => {
-        fetchOrders({})
-    }, [])
-
-    useEffect(() => {console.log("TOVA SA ORDERS", orders)}, [orders])
-
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const [orderPicked,setOrderPicked] = useState(false);
 
     useEffect(() => {
         socket.on.OrderReadyForPickup = pushOrderToStack;
         socket.on.OrderStatusChange = removeOrderFromStack;
+        (async () => {
+            try {
+                await fetchOrders();
+            } catch (error) {
+                
+            }
+        })();
     }, [pushOrderToStack, removeOrderFromStack]);
     
-    const pickUp = () => {
-        setSelectedOrder(orders[0]);
-        authenticationService.userManager.getUser().then(user => {
-            axios.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
-            axios.patch("https://localhost:5052/orders", {id: orders[0].id, status: 4});
-        })
-    } 
-    
-    const deliver = async () => {
-        axios.patch("https://localhost:5052/orders", {id: selectedOrder!.id, status: 5}).then(() => setSelectedOrder(null));
+    const handleAction = () => {
+        if (orderPicked) {
+            notifyDelivered();
+            setOrderPicked(false);
+        } else {
+            notifyPickup();
+            setOrderPicked(true);
+        }
     }
-
+    const orderComponent = () : ReactElement => {
+        return (
+            <div className="relative p-6 ">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-yellow-800 to-yellow-500 shadow-lg transform skew-y-6 sm:skew-y-0 sm:rotate-6 rounded-3xl 2xl:skew-y-4 2xl:rotate-4"
+                    ></div>
+                    <div className="relative w-full">
+                        <div className="flex relative flex-col bg-white rounded-xl shadow-lg pt-4">
+                            <div className="py-2">
+                                <span>Order Number: {orderAvailable.id}</span>
+                            </div>
+                            <div className="py-2">
+                                <span>Addres: {orderAvailable.address}</span>
+                            </div>
+                            <div className="py-2">
+                                <span>Customer Name: {orderAvailable.firstName} {orderAvailable.lastName}</span>
+                            </div>
+                            <div className="py-2">
+                                <span>Phone: {orderAvailable.phone}</span>
+                            </div>
+                            <div>
+                                <button
+                                    onClick={handleAction}
+                                    className="px-4 w-full py-2 shadow-md rounded-md font-semibold text-gray-800 mt-4 bg-gradient-to-b from-gray-100 to-gray-200"
+                                >{orderPicked ? "Order Delivered" : 'Pick Order'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 	return (
         <IonPage>
             <IonContent class="ion-text-center">
-            {(orders[0] !== undefined && !selectedOrder) && 
-                <>
-                    <IonCard>
-                        <IonCardHeader>
-                            <IonCardTitle>Order Number {orders[0].id.toString()}</IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                            <IonItem>
-                                <IonLabel>Addres: {orders[0].address.toString()}</IonLabel>
-                            </IonItem>
-                            <IonItem>
-                                <IonLabel>Customer Name: {orders[0].firstName.toString()} {orders[0].lastName.toString()}</IonLabel>
-                            </IonItem>
-                            <IonItem>
-                                <IonLabel>Phone: {orders[0].phone.toString()}</IonLabel>
-                            </IonItem>
-                            <div className="ion-text-center">  
-                                <IonButton onClick={() => pickUp()}>Notify Pick-Up</IonButton>
-                            </div>
-                        </IonCardContent>
-                    </IonCard>
-                </>
-            }
-            {selectedOrder && 
-                <>
-                    <IonCard>
-                        <IonCardHeader>
-                            <IonCardTitle>Order Number {selectedOrder.id.toString()}</IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                            <IonItem>
-                                <IonLabel>Addres: {selectedOrder.address.toString()}</IonLabel>
-                            </IonItem>
-                            <IonItem>
-                                <IonLabel>Customer Name: {selectedOrder.firstName.toString()} {selectedOrder.lastName.toString()}</IonLabel>
-                            </IonItem>
-                            <IonItem>
-                                <IonLabel>Phone: {selectedOrder.phone.toString()}</IonLabel>
-                            </IonItem>
-                            <div className="ion-text-center">  
-                                <IonButton onClick={() => deliver()}>Deliver</IonButton>
-                            </div>
-                        </IonCardContent>
-                    </IonCard>
-                </>
-            }
-            {(orders[0] === undefined && !selectedOrder) && 
-                <div className="col" style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                    <IonText>Waiting for new orders to come...</IonText>
+                <div className="flex flex-col justify-center h-full">
+                    {
+                        orderAvailable.id === undefined
+                            ? <IonText>Waiting for new orders to come...</IonText>
+                            :
+                            orderComponent()
+                    }
                 </div>
-            }
-            <IonAlert
-                isOpen={orderAvailable.id !== undefined}
-                header="Order available!"
-                cssClass="rounded-lg shadow-lg"
-                message={`${orderAvailable.id}`}
-                buttons={['OK']}
-            />
             </IonContent>
         </IonPage>
 	);

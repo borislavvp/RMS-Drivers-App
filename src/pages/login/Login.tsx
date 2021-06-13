@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { IonItem, IonList, IonInput, IonLabel, IonButton, IonText,} from '@ionic/react';
 import { useStoreActions, useStoreState } from '../../store';
-import { useHistory } from 'react-router';
 
 export const Login: React.FC = () => {
 	const performLogin = useStoreActions((actions) => actions.authenticationService.login)

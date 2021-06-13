@@ -12,7 +12,6 @@ export const SignOutRedirect: React.FC = () => {
                 await handleLogoutCallback();
                 history.push("/")
             } catch (error) {
-                console.log(error)
                 history.push("/")
             }
         })()

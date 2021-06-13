@@ -1,7 +1,8 @@
-import { action, thunk, Action, Thunk, ActionMapper } from 'easy-peasy';
+import { action, thunk, Action, Thunk } from 'easy-peasy';
 import { User, UserManager } from 'oidc-client';
 import axios from 'axios';
 import { ISocketService } from './socket/SocketService';
+import { environtments } from '../environments';
 
 export interface ILoginInput {
 	email: string;
@@ -19,6 +20,8 @@ export interface IAuthenticationService {
     handleLoginCallback: Thunk<IAuthenticationService, void, ISocketService,{},Promise<void>>;
     logout: Thunk<IAuthenticationService, void, {},Promise<void>>;
     handleLogoutCallback: Thunk<IAuthenticationService, void, ISocketService,{},Promise<void>>;
+	setLoggedInTrue: Action<IAuthenticationService>;
+	setLoggedInFalse: Action<IAuthenticationService>;
 	initiateLoading: Action<IAuthenticationService>;
 	finalizeLoading: Action<IAuthenticationService>;
 	initiateRedirecting: Action<IAuthenticationService>;
@@ -30,7 +33,7 @@ export const authenticationService: IAuthenticationService = {
     redirecting: false,
     isLoggedIn:false,
     userManager: new UserManager({
-      authority: "https://localhost:5001",
+      authority: environtments.IDENTITY_AUTHORITY,
       client_id: "MOBILE_APP_ID",
       redirect_uri:  window.location.protocol + "//" + window.location.host + "/signin-oidc",
       response_type: "code",
@@ -58,25 +61,26 @@ export const authenticationService: IAuthenticationService = {
                 const IsLoggedIn = user ? !user.expired : false;
                 if (currentState !== IsLoggedIn) {
                     if (IsLoggedIn) {
-                        state.injections.connect("ws://localhost:3333", user!.access_token)
+                        state.injections.connect(environtments.ORDERS_STATUS_SERVICE, user!.access_token);
+                        actions.setLoggedInTrue();
                     } else {
+                        actions.setLoggedInFalse();
                         state.injections.disconnect();
                     }
                 }
-                state.getState().isLoggedIn = IsLoggedIn;
                 resolve(IsLoggedIn);
             })
             .catch(() => {
-                state.getState().isLoggedIn = false;
+                actions.setLoggedInFalse();
                 resolve(false);
             }).finally(() => actions.finalizeLoading())
         })
     }),
     login: thunk((actions, { email, password },state) : Promise<void> => {
-        return new Promise<void>((resolve,reject) => {
+        return new Promise<void>((resolve, reject) => {
             const manager = state.getState().userManager;
             actions.initiateLoading();
-            axios.post("https://localhost:5001/api/login", { email, password }, {
+            axios.post(`${environtments.IDENTITY_AUTHORITY}/api/login`, { email, password }, {
                 withCredentials:true
             })
                 .then(r => actions.initiateRedirecting())
@@ -91,7 +95,6 @@ export const authenticationService: IAuthenticationService = {
     }),
     handleLoginCallback : thunk((actions,_,state) : Promise<void> => {
         return new Promise<void>((resolve, reject) => {
-            actions.initiateRedirecting();
             state.getState().userManager
                 .signinRedirectCallback()
                 .then(() => {
@@ -99,8 +102,8 @@ export const authenticationService: IAuthenticationService = {
                     manager.getUser()
                     .then((user) =>{
                         axios.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
-                        state.injections.connect("ws://localhost:3333", user!.access_token)
-                        state.getState().isLoggedIn = true;
+                        state.injections.connect(environtments.ORDERS_STATUS_SERVICE, user!.access_token)
+                        actions.setLoggedInTrue();
                         resolve()
                     })
                     .catch(() => reject())
@@ -127,7 +130,7 @@ export const authenticationService: IAuthenticationService = {
                 .signoutRedirectCallback()
                 .then(() => {
                     axios.defaults.headers = null;
-                    state.getState().isLoggedIn = false;
+                    actions.setLoggedInFalse();
                     state.injections.disconnect();
                     resolve();
                 })
@@ -135,6 +138,12 @@ export const authenticationService: IAuthenticationService = {
                 .finally(() => actions.finalizeRedirecting());
         })
     }),
+	setLoggedInTrue: action((state) => {
+		state.isLoggedIn = true;
+	}),
+	setLoggedInFalse: action((state) => {
+		state.isLoggedIn = false;
+	}),
 	initiateLoading: action((state) => {
 		state.loading = true;
 	}),

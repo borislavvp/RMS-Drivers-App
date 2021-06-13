@@ -4,6 +4,7 @@ import { socket, useStoreActions, useStoreState } from '../store';
 import { OrderStatus } from '../service/socket/messages/server/OrderStatusChangeMessage';
 import axios from 'axios';
 import { authenticationService } from '../service/AuthenticationService';
+import { GoogleMap, withScriptjs, withGoogleMap } from "react-google-maps"
 
 export interface Order {
     id: number;
@@ -47,6 +48,17 @@ export const Main: React.FC = () => {
         axios.patch("https://localhost:5052/orders", {id: selectedOrder!.id, status: 5}).then(() => setSelectedOrder(null));
     }
 
+    function Map(){
+        return(
+            <GoogleMap
+            defaultZoom={10}
+            defaultCenter={{ lat:10, lng:10}}    
+            />
+        )
+    }
+
+    const WrappedMap:any = withScriptjs(withGoogleMap(Map));
+
 	return (
         <IonPage>
             <IonContent class="ion-text-center">
@@ -71,6 +83,14 @@ export const Main: React.FC = () => {
                             </div>
                         </IonCardContent>
                     </IonCard>
+                    <div style={{width: '200px', height: '200px' }}>
+                        <WrappedMap 
+                        googleMapURL={'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyAy1MbbVLsvv_grlc3MXhwwZ3WaoeXWko4'}
+                        loadingElement={<div style={{ height: `100%` }} />}
+                        containerElement={<div style={{ height: `100%` }} />}
+                        mapElement={<div style={{ height: `100%` }} />}
+                        />
+                    </div>
                 </>
             }
             {selectedOrder && 
@@ -80,7 +100,6 @@ export const Main: React.FC = () => {
                             <IonCardTitle>Order Number {selectedOrder.id.toString()}</IonCardTitle>
                         </IonCardHeader>
                         <IonCardContent>
-<<<<<<< Updated upstream
                             <IonItem>
                                 <IonLabel>Addres: {selectedOrder.address.toString()}</IonLabel>
                             </IonItem>
@@ -109,38 +128,6 @@ export const Main: React.FC = () => {
                 message={`${orderAvailable.id}`}
                 buttons={['OK']}
             />
-=======
-                        <IonItem>
-                            <IonLabel>Addres: {address}</IonLabel>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel>Customer Name: {name}</IonLabel>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel>Phone: {phone}</IonLabel>
-                        </IonItem>
-                        <div className="ion-text-center ion-padding-top">  
-                        {pickedup == false && <IonButton>
-                            {/* <IonIcon name="arrow-up-outline">.</IonIcon> */}
-                            Notify Pick-Up
-                        </IonButton>}
-                        </div>
-                        </IonCardContent>
-                    </IonCard>
-                    
-                    
-                    {/* {pickedup == true && <IonButton onClick={() => changeOrderState()}>
-                        <IonIcon name="bag-check-outline"></IonIcon>
-                        Delivered
-                    </IonButton>} */}
-                {orderAvailable.orderNumber !== undefined && <IonAlert
-                    isOpen={true}
-                    header="Order available!"
-                    cssClass="rounded-lg shadow-lg"
-                    message={`${orderAvailable.orderNumber}`}
-                    buttons={['OK']}
-                />}
->>>>>>> Stashed changes
             </IonContent>
         </IonPage>
 	);

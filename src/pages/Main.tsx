@@ -80,6 +80,7 @@ export const Main: React.FC = () => {
                             <IonCardTitle>Order Number {selectedOrder.id.toString()}</IonCardTitle>
                         </IonCardHeader>
                         <IonCardContent>
+<<<<<<< Updated upstream
                             <IonItem>
                                 <IonLabel>Addres: {selectedOrder.address.toString()}</IonLabel>
                             </IonItem>
@@ -108,6 +109,38 @@ export const Main: React.FC = () => {
                 message={`${orderAvailable.id}`}
                 buttons={['OK']}
             />
+=======
+                        <IonItem>
+                            <IonLabel>Addres: {address}</IonLabel>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel>Customer Name: {name}</IonLabel>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel>Phone: {phone}</IonLabel>
+                        </IonItem>
+                        <div className="ion-text-center ion-padding-top">  
+                        {pickedup == false && <IonButton>
+                            {/* <IonIcon name="arrow-up-outline">.</IonIcon> */}
+                            Notify Pick-Up
+                        </IonButton>}
+                        </div>
+                        </IonCardContent>
+                    </IonCard>
+                    
+                    
+                    {/* {pickedup == true && <IonButton onClick={() => changeOrderState()}>
+                        <IonIcon name="bag-check-outline"></IonIcon>
+                        Delivered
+                    </IonButton>} */}
+                {orderAvailable.orderNumber !== undefined && <IonAlert
+                    isOpen={true}
+                    header="Order available!"
+                    cssClass="rounded-lg shadow-lg"
+                    message={`${orderAvailable.orderNumber}`}
+                    buttons={['OK']}
+                />}
+>>>>>>> Stashed changes
             </IonContent>
         </IonPage>
 	);

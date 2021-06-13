@@ -1,7 +1,8 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import {  IonText, IonPage, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel} from '@ionic/react';
+import {  IonText, IonPage, IonContent} from '@ionic/react';
 import { socket, useStoreActions, useStoreState } from '../store';
 import { OrderStatus } from '../service/socket/messages/server/OrderStatusChangeMessage';
+import { GoogleMap, withScriptjs, withGoogleMap,Marker, InfoWindow  } from "react-google-maps"
 
 export interface Order {
     id: number;
@@ -44,50 +45,89 @@ export const Main: React.FC = () => {
             setOrderPicked(true);
         }
     }
-    const orderComponent = () : ReactElement => {
+    const [markerInfo, toggleMarkeInfo] = useState(true);
+    function Map(){
+        return(
+            <GoogleMap
+            defaultZoom={10}
+            defaultCenter={{ lat:51.46, lng:5.4}}    
+            >
+                {orderAvailable.id !== undefined &&
+                    <Marker
+                        onClick={() => toggleMarkeInfo(true)}
+                        position={{ lat: 51.46, lng: 5.4 }
+                    }> {markerInfo &&
+                        <InfoWindow onCloseClick={() => toggleMarkeInfo(false)}>
+                        <button
+                                className="font-semibold text-blue-600 underline"
+                                onClick={() => window.open("https://maps.google.com?q=" + 51.46 + "," + 5.4)}
+                            >
+                                View in Google Maps
+                            </button>
+                        </InfoWindow>}
+                    </Marker>
+                }
+            </GoogleMap>
+        )
+    }
+    const WrappedMap: any = withScriptjs(withGoogleMap(Map));
+    
+    const noOrdersComponent = (): ReactElement => {
         return (
-            <div className="relative p-6 ">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-yellow-800 to-yellow-500 shadow-lg transform skew-y-6 sm:skew-y-0 sm:rotate-6 rounded-3xl 2xl:skew-y-4 2xl:rotate-4"
-                    ></div>
-                    <div className="relative w-full">
-                        <div className="flex relative flex-col bg-white rounded-xl shadow-lg pt-4">
-                            <div className="py-2">
-                                <span>Order Number: {orderAvailable.id}</span>
-                            </div>
-                            <div className="py-2">
-                                <span>Addres: {orderAvailable.address}</span>
-                            </div>
-                            <div className="py-2">
-                                <span>Customer Name: {orderAvailable.firstName} {orderAvailable.lastName}</span>
-                            </div>
-                            <div className="py-2">
-                                <span>Phone: {orderAvailable.phone}</span>
-                            </div>
-                            <div>
-                                <button
-                                    onClick={handleAction}
-                                    className="px-4 w-full py-2 shadow-md rounded-md font-semibold text-gray-800 mt-4 bg-gradient-to-b from-gray-100 to-gray-200"
-                                >{orderPicked ? "Order Delivered" : 'Pick Order'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <div
+                className={`fixed flex flex-col justify-between bottom-0 shadow-lg rounded-t-xl overflow-hidden bg-white w-full`}
+                style={{ height: '9vh', zIndex: 99999 }}
+            >
+                <div className="py-6 h-full shadow-lg rounded-xl justify-center font-semibold">
+                    <IonText>Waiting for new orders to come...</IonText>
                 </div>
             </div>
         )
     }
-	return (
-        <IonPage>
-            <IonContent class="ion-text-center">
-                <div className="flex flex-col justify-center h-full">
-                    {
-                        orderAvailable.id === undefined
-                            ? <IonText>Waiting for new orders to come...</IonText>
-                            :
-                            orderComponent()
-                    }
+    const orderPickupComponent = (): ReactElement => {
+        return (
+            <div
+                className={`fixed flex flex-col justify-between bottom-0 shadow-lg rounded-t-xl overflow-hidden w-full`}
+                style={{ height: '30vh', zIndex: 99999 }}
+            >
+                    <div className="flex flex-auto px-6 flex-col bg-white pt-6">
+                        <div className="py-2">
+                            <span>Order Number: {orderAvailable.id}</span>
+                        </div>
+                        <div className="py-2">
+                            <span>Addres: {orderAvailable.address}</span>
+                        </div>
+                        <div className="py-2">
+                            <span>Customer Name: {orderAvailable.firstName} {orderAvailable.lastName}</span>
+                        </div>
+                        <div className="py-2">
+                            <span>Phone: {orderAvailable.phone}</span>
+                        </div>
+                    </div>
+                    <div className="rounded-t-xl overflow-hidden">
+                        <button
+                            onClick={handleAction}
+                        className={`p-4 w-full text-base shadow-md font-semibold text-white bg-gradient-to-r 
+                            from-${orderPicked ? 'blue-800' : 'yellow-800'} to-${orderPicked ? 'blue-600' : 'yellow-500'}`}
+                        >{orderPicked ? "Order Delivered" : 'Pick Order'}
+                        </button>
+                    </div>
                 </div>
+        )
+    }
+    
+	return (
+        <IonPage className="overflow-hidden">
+            <IonContent class="ion-text-center">
+                <div style={{width: '100%', height:orderAvailable.id !== undefined ? '72vh' : '93vh' }}>
+                        <WrappedMap 
+                        googleMapURL={'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyAy1MbbVLsvv_grlc3MXhwwZ3WaoeXWko4'}
+                        loadingElement={<div style={{ height: `100%` }} />}
+                        containerElement={<div style={{ height: `100%` }} />}
+                        mapElement={<div style={{ height: `100%` }} />}
+                        />
+                </div>
+                {orderAvailable.id === undefined ? noOrdersComponent() : orderPickupComponent()}
             </IonContent>
         </IonPage>
 	);

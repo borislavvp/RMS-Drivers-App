@@ -1,10 +1,12 @@
 {
   "name": "mobile-app-drivers",
+  "homepage":"/drivers/",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^1.5.3",
     "@capacitor/core": "1.5.1",
+    "@craco/craco": "^6.1.2",
     "@ionic/pwa-elements": "^1.5.2",
     "@ionic/react": "^5.6.8",
     "@ionic/react-hooks": "0.0.6",
@@ -20,21 +22,18 @@
     "@types/react-router-dom": "^5.1.7",
     "easy-peasy": "^3.3.1",
     "ionicons": "^5.5.1",
-    "postcss": "^8.3.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-google-maps": "^9.4.5",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.0",
+    "react-scripts": "^4.0.3",
     "typescript": "3.7.4"
   },
   "scripts": {
-    "ionic:serve": "react-scripts start",
-    "ionic:build": "npm run css:build && react-scripts build",
-    "start": "react-scripts start",
-    "build": "ionic build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "css:build": "npx tailwindcss build -o src/theme/main.css"
   },
@@ -60,6 +59,7 @@
     "autoprefixer": "^9.8.6",
     "axios": "^0.19.2",
     "oidc-client": "^1.11.5",
-    "tailwindcss": "^2.1.4"
+    "postcss": "^7.0.36",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.4"
   }
 }

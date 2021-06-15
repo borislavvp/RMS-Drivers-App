@@ -1,19 +1,6 @@
 const { fontFamily, spacing } = require("tailwindcss/defaultTheme");
 module.exports = {
-   purge: {
-    // Uncomment for faster build time
-    // enabled:true,
-    enabled:
-      process.env.NODE_ENV === "production",
-    content: [
-      "./src/**/*.pcss",
-      "./src/**/*.css",
-      "./src/**/*.sass",
-      "./src/**/*.html",
-      "./src/**/*.js",
-      "./src/**/*.ts"
-    ],
-  },
+   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   darkMode: 'class', // or 'media' or false
   theme: {
     extend: {

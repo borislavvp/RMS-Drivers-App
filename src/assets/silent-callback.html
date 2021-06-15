@@ -4,12 +4,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="/assets/js/oidc-client.min.js" ></script>
+    <script src="/drivers/assets/js/oidc-client.min.js" ></script>
 </head>
 <body>
     <script>
         new Oidc.UserManager({
-            authority: "https://localhost:5001",
+            authority: "https:/51.141.4.73",
             client_id: "MOBILE_APP_ID",
             response_type: "code",
             scope: "openid profile proepdriversgateway.fullaccess",

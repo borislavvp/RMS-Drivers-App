@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Route, Router } from 'react-router-dom';
-import { IonApp, IonLoading, IonRouterOutlet } from '@ionic/react';
+import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Main } from './pages/Main';
 import { Login } from './pages/login/Login';

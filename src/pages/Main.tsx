@@ -36,13 +36,21 @@ export const Main: React.FC = () => {
         })();
     }, [pushOrderToStack, removeOrderFromStack]);
     
-    const handleAction = () => {
+    const handleAction = async () => {
         if (orderPicked) {
-            notifyDelivered();
-            setOrderPicked(false);
+            try {
+                await notifyDelivered();
+                setOrderPicked(false);
+            } catch (error) {
+                alert("Something went wrong, please try again!")
+            }
         } else {
-            notifyPickup();
-            setOrderPicked(true);
+             try {
+                await notifyPickup();
+                setOrderPicked(true);
+            } catch (error) {
+                alert("Something went wrong, please try again!")
+            }
         }
     }
     const [markerInfo, toggleMarkeInfo] = useState(true);
@@ -50,17 +58,17 @@ export const Main: React.FC = () => {
         return(
             <GoogleMap
             defaultZoom={10}
-            defaultCenter={{ lat:51.46, lng:5.4}}    
+            defaultCenter={{ lat: 51.4445061, lng:5.4700953}}    
             >
                 {orderAvailable.id !== undefined &&
                     <Marker
                         onClick={() => toggleMarkeInfo(true)}
-                        position={{ lat: 51.46, lng: 5.4 }
+                        position={{ lat: 51.4445061, lng: 5.4700953 }
                     }> {markerInfo &&
                         <InfoWindow onCloseClick={() => toggleMarkeInfo(false)}>
                         <button
                                 className="font-semibold text-blue-600 underline"
-                                onClick={() => window.open("https://maps.google.com?q=" + 51.46 + "," + 5.4)}
+                                onClick={() => window.open("https://maps.google.com?q=" + 51.4445061 + "," + 5.4700953)}
                             >
                                 View in Google Maps
                             </button>
@@ -109,7 +117,7 @@ export const Main: React.FC = () => {
                             onClick={handleAction}
                         className={`p-4 w-full text-base shadow-md font-semibold text-white bg-gradient-to-r 
                             from-${orderPicked ? 'blue-800' : 'yellow-800'} to-${orderPicked ? 'blue-600' : 'yellow-500'}`}
-                        >{orderPicked ? "Order Delivered" : 'Pick Order'}
+                        >{orderPicked ? "Finish Order" : 'Pick Order'}
                         </button>
                     </div>
                 </div>

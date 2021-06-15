@@ -1,8 +1,8 @@
 import { action, thunk, Action, Thunk } from 'easy-peasy';
 import { User, UserManager } from 'oidc-client';
-import axios from 'axios';
 import { ISocketService } from './socket/SocketService';
 import { environtments } from '../environments';
+import { axiosInstance } from '../store';
 
 export interface ILoginInput {
 	email: string;
@@ -35,12 +35,12 @@ export const authenticationService: IAuthenticationService = {
     userManager: new UserManager({
       authority: environtments.IDENTITY_AUTHORITY,
       client_id: "MOBILE_APP_ID",
-      redirect_uri:  window.location.protocol + "//" + window.location.host + "/signin-oidc",
+      redirect_uri:  window.location.protocol + "//" + window.location.host + "/drivers/signin-oidc",
       response_type: "code",
       scope: "openid profile proepdriversgateway.fullaccess",
-      post_logout_redirect_uri: window.location.protocol + "//" + window.location.host + "/signout-callback-oidc",
+      post_logout_redirect_uri: window.location.protocol + "//" + window.location.host + "/drivers/signout-callback-oidc",
       automaticSilentRenew: true,
-      silent_redirect_uri: window.location.protocol + "//" + window.location.host + "/assets/silent-callback.html"
+      silent_redirect_uri: window.location.protocol + "//" + window.location.host + "/drivers/assets/silent-callback.html"
     }),
     user: thunk((actions,_,state) => {
         return new Promise<User | null>((resolve, reject) => {
@@ -80,7 +80,7 @@ export const authenticationService: IAuthenticationService = {
         return new Promise<void>((resolve, reject) => {
             const manager = state.getState().userManager;
             actions.initiateLoading();
-            axios.post(`${environtments.IDENTITY_AUTHORITY}/api/login`, { email, password }, {
+            axiosInstance.post(`${environtments.IDENTITY_AUTHORITY}/api/login`, { email, password }, {
                 withCredentials:true
             })
                 .then(r => actions.initiateRedirecting())
@@ -101,7 +101,7 @@ export const authenticationService: IAuthenticationService = {
                     const manager = state.getState().userManager;
                     manager.getUser()
                     .then((user) =>{
-                        axios.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
+                        axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + user!.access_token;
                         state.injections.connect(environtments.ORDERS_STATUS_SERVICE, user!.access_token)
                         actions.setLoggedInTrue();
                         resolve()
@@ -129,7 +129,7 @@ export const authenticationService: IAuthenticationService = {
             state.getState().userManager
                 .signoutRedirectCallback()
                 .then(() => {
-                    axios.defaults.headers = null;
+                    axiosInstance.defaults.headers = null;
                     actions.setLoggedInFalse();
                     state.injections.disconnect();
                     resolve();

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drivers
+  namespace:  ingress
+  labels:
+    app: drivers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drivers
+  template:
+    metadata:
+      labels:
+        app: drivers
+    spec:
+      containers:
+      - name: drivers
+        image: acrproep01.azurecr.io/drivers:v2.2
+        ports:
+        - containerPort: 80

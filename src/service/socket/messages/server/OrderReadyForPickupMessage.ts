@@ -1,3 +1,4 @@
+import { Order } from "../../../../pages/Main";
 import { Message } from "../Message";
 import { ServerMessageType } from "./ServerMessageType";
 

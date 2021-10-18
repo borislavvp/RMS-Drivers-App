@@ -11,7 +11,6 @@ export const SignInRedirect: React.FC = () => {
                 await handleLoginCallback();
                 history.push("/")
             } catch (error) {
-                console.log(error)
                 history.push("/")
             }
         })()
